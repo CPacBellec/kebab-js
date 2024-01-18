@@ -116,7 +116,7 @@ function sendToKitchen() {
 
             // Créer un élément de liste pour afficher la commande en cuisine
             const listItem = document.createElement('li');
-            listItem.innerHTML = `${selectedRecipe} - Sauce : ${sauce} - Commande lancée à ${date.toLocaleTimeString()} <span id="timer_${Date.now()}"></span> <button onclick="validateOrder(this)">Valider</button>`;
+            listItem.innerHTML = `${selectedRecipe} - Sauce : ${sauce} - Commande lancée à ${date.toLocaleTimeString()} <span id="timer_${Date.now()}"></span> <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="validateOrder(this)">Valider</button>`;
 
             // Ajouter la commande à la liste des commandes en cuisine
             document.getElementById('orderList').appendChild(listItem);

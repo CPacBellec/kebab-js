@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+        <title>Kebab du Soleil - Cuisine</title>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-gray-100 p-8">
@@ -13,8 +13,8 @@
         <div class="max-w-lg mx-auto bg-white p-6 rounded-md shadow-md">
         
             <!-- Formulaire pour Ajouter, Visualiser et Supprimer une recette -->
-            <div class="mb-6">
-                <h2 class="text-lg font-semibold mb-2">Recettes</h2>
+            <div class="mb-6 space-y-5">
+                <h2 class="text-lg font-semibold mb-2">Ajouter une recette</h2>
                 <input type="text" id="recipeName" placeholder="Nom de la recette" class="border p-2 mr-2">
                 <input type="text" id="ingredients" placeholder="Ingrédients" class="border p-2 mr-2">
                 <button onclick="addRecipe()" class="bg-blue-500 text-white px-4 py-2 rounded">Ajouter</button>
@@ -27,7 +27,7 @@
             
         
             <!-- Formulaire pour Lancer une commande en cuisine -->
-            <div class="mb-6">
+            <div class="mb-6 space-y-5">
                 <h2 class="text-lg font-semibold mb-2">Commande en cuisine</h2>
                 <select id="recipeSelect" class="border p-2 mr-2"></select>
                 <input type="text" id="sauce" placeholder="Sauce" class="border p-2 mr-2">
@@ -35,12 +35,9 @@
             </div>
 
             <div>
-                <h2>Liste des commandes</h2>
+                <h2 class="text-lg font-semibold mb-2">Liste des commandes</h2>
                 <!-- Liste des commandes en cuisine -->
                 <ul id="orderList" class="mb-6"></ul>
-                <h2>Commandes validés</h2>
-                <!-- Liste des commandes validées -->
-                <ul id="validatedOrders"></ul>
             </div>
             
         
