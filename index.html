@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Kebabier's Kitchen</title>
+</head>
+<body>
+  <div id="app">
+    <h1>Kebabier's Kitchen</h1>
+
+    <!-- Section pour ajouter une recette -->
+    <div>
+      <h2>Ajouter une recette</h2>
+      <input type="text" id="recipeName" placeholder="Nom de la recette">
+      <input type="text" id="ingredients" placeholder="Ingrédients">
+      <button onclick="addRecipe()">Ajouter</button>
+    </div>
+
+    <!-- Section pour visualiser et supprimer une recette -->
+    <div>
+      <h2>Liste des recettes</h2>
+      <ul id="recipeList"></ul>
+    </div>
+
+    <!-- Section pour lancer une commande en cuisine -->
+    <div>
+      <h2>Lancer une commande en cuisine</h2>
+      <select id="selectRecipe"></select>
+      <input type="text" id="sauce" placeholder="Sauce">
+      <button onclick="sendToKitchen()">Envoyer en cuisine</button>
+    </div>
+
+    <!-- Section pour visualiser et valider une commande -->
+    <div>
+      <h2>Liste des commandes en cuisine</h2>
+      <ul id="orderList"></ul>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
