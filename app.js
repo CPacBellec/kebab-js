@@ -92,6 +92,7 @@ function sendToKitchen() {
             const date = new Date(data.datetime);
 
             const listItem = document.createElement('li');
+            listItem.selectedRecipe = selectedRecipe;  // Ajoutez cette ligne
             listItem.innerHTML = `${selectedRecipe} - Sauce : ${sauce} - Commande lancée à ${date.toLocaleTimeString()} <span id="timer_${Date.now()}"></span> <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="validateOrder(this)">Valider</button>`;
 
             document.getElementById('orderList').appendChild(listItem);
@@ -100,6 +101,7 @@ function sendToKitchen() {
         })
         .catch(error => console.error('Erreur lors de la récupération de l\'heure:', error));
 }
+
 function startTimerForOrder(startDate, listItem) {
     let timer;
     timer = setInterval(function () {
@@ -116,22 +118,79 @@ function startTimerForOrder(startDate, listItem) {
 }
 function validateOrder(button) {
     const listItem = button.parentNode;
-    clearInterval(listItem.dataset.timerId); 
+    clearInterval(listItem.dataset.timerId);
 
     const savedOrders = JSON.parse(localStorage.getItem('orders')) || { inProgress: [], validated: [] };
 
-    savedOrders.validated.push({ name: listItem.textContent, time: new Date() });
+    savedOrders.validated.push({ name: listItem.selectedRecipe, time: new Date(), sauce: listItem.sauce });
 
-    localStorage.setItem('orders', JSON.stringify(savedOrders));
+    saveOrders(savedOrders);
 
     loadOrders();
 
-    const deleteButton = document.createElement('button');
-    deleteButton.innerHTML = 'Supprimer';
-    deleteButton.onclick = function () {
-        deleteValidatedOrder(this);
-    };
-    listItem.appendChild(deleteButton);
+    // Afficher le modal avec le récapitulatif de la commande
+    showModal(listItem);
+}
+
+function createModal(content) {
+    const modalContainer = document.createElement('div');
+    modalContainer.id = 'modalContainer';
+    modalContainer.innerHTML = `
+        <div class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                ${content}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modalContainer);
+}
+
+function closeModal() {
+    const modalContainer = document.getElementById('myModalContainer');
+    modalContainer.style.display = 'none';
+
+    // Ajoutez ici le code pour supprimer la commande
+    deleteOrder(); // Vous devrez implémenter la fonction deleteOrder
+}
+
+
+
+function showModal(listItem) {
+    const modalContent = document.getElementById('modalContent');
+    const modalContainer = document.getElementById('myModalContainer');
+
+    // Vérifier si les éléments existent avant de les manipuler
+    if (modalContent && modalContainer) {
+        // Stocker le texte de la commande dans un attribut de données
+        modalContent.setAttribute('data-command', listItem.textContent);
+
+        modalContent.innerHTML = `
+            <p>Récapitulatif de la commande :</p>
+            <p>${listItem.textContent}</p>
+            <button onclick="confirmOrder()">Confirmer</button>
+        `;
+
+        modalContainer.style.display = 'block';
+    }
+}
+
+
+
+
+function confirmOrder() {
+    console.log("Confirm Order function called");
+    // Récupérer le contenu du récapitulatif
+    const recapContent = document.getElementById('modalContent').innerHTML;
+
+    // Afficher le récapitulatif
+    alert("Récapitulatif de la commande :\n\n" + recapContent);
+
+    // Masquer le modal
+    document.getElementById('myModalContainer').style.display = 'none';
+
+    // Afficher un message après confirmation (ex : Impression de votre ticket de caisse.)
+    alert("Commande confirmée. Votre ticket de caisse est en cours d'impression.");
 }
 
 function saveOrders(orders) {
@@ -144,21 +203,48 @@ function loadOrders() {
     const orderList = document.getElementById('orderList');
     const validatedOrdersList = document.getElementById('validatedOrders');
 
-    orderList.innerHTML = '';
-    validatedOrdersList.innerHTML = '';
+    // Vérifier si les éléments existent avant de les manipuler
+    if (orderList && validatedOrdersList) {
+        orderList.innerHTML = '';
+        validatedOrdersList.innerHTML = '';
 
-    savedOrders.inProgress.forEach((order) => {
-        const listItem = createOrderListItem(order);
-        orderList.appendChild(listItem);
-        startTimerForOrder(order.time, listItem);
-    });
+        savedOrders.inProgress.forEach((order) => {
+            const listItem = createOrderListItem(order);
+            orderList.appendChild(listItem);
+            startTimerForOrder(order.time, listItem);
+        });
 
-    savedOrders.validated.forEach((order) => {
-        const listItem = createOrderListItem(order);
-        const deleteButton = createDeleteButton(() => deleteValidatedOrder(listItem));
-        listItem.appendChild(deleteButton);
-        validatedOrdersList.appendChild(listItem);
-    });
+        savedOrders.validated.forEach((order) => {
+            const listItem = createOrderListItem(order);
+            const deleteButton = createDeleteButton(() => deleteValidatedOrder(listItem));
+            listItem.appendChild(deleteButton);
+            validatedOrdersList.appendChild(listItem);
+        });
+    }
+}
+
+function deleteOrder() {
+    // Obtenir le texte de la commande à partir de l'attribut de données
+    const modalContent = document.getElementById('modalContent');
+    const commandText = modalContent.getAttribute('data-command');
+
+    if (commandText) {
+        const savedOrders = JSON.parse(localStorage.getItem('orders')) || { inProgress: [], validated: [] };
+
+        // Trouver l'index de la commande dans le tableau des commandes validées
+        const orderIndex = savedOrders.validated.findIndex(order => order.name === commandText);
+
+        if (orderIndex !== -1) {
+            // Supprimer la commande de la liste des commandes validées
+            savedOrders.validated.splice(orderIndex, 1);
+
+            // Enregistrer les commandes mises à jour dans le stockage local
+            saveOrders(savedOrders);
+
+            // Mettre à jour l'affichage des commandes
+            loadOrders();
+        }
+    }
 }
 
 function createOrderListItem(order) {
