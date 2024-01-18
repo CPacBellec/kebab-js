@@ -1,54 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="styles.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <title>Kebabier's Kitchen</title>
-</head>
-<body class="bg-gray-100 p-8">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 p-8">
 
-  <div id="app" class="max-w-2xl mx-auto">
+        <h1 class="text-center text-xl font-bold py-5">Kebab du Soleil</h1>
 
-    <h1 class="text-3xl font-bold mb-8">Kebabier's Kitchen</h1>
+        <div class="max-w-lg mx-auto bg-white p-6 rounded-md shadow-md">
+        
+            <!-- Formulaire pour Ajouter, Visualiser et Supprimer une recette -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-2">Recettes</h2>
+                <input type="text" id="recipeName" placeholder="Nom de la recette" class="border p-2 mr-2">
+                <input type="text" id="ingredients" placeholder="Ingrédients" class="border p-2 mr-2">
+                <button onclick="addRecipe()" class="bg-blue-500 text-white px-4 py-2 rounded">Ajouter</button>
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold mb-2">Liste des recettes</h2>
+                <ul id="recipeList" class="mb-6"></ul>
+            </div>
+            <!-- Liste des recettes -->
+            
+        
+            <!-- Formulaire pour Lancer une commande en cuisine -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-2">Commande en cuisine</h2>
+                <select id="recipeSelect" class="border p-2 mr-2"></select>
+                <input type="text" id="sauce" placeholder="Sauce" class="border p-2 mr-2">
+                <button onclick="sendToKitchen()" class="bg-green-500 text-white px-4 py-2 rounded">Envoyer en cuisine</button>
+            </div>
 
-    <!-- Section pour ajouter une recette -->
-    <div class="mb-8">
-      <h2 class="text-2xl font-semibold mb-4">Ajouter une recette</h2>
-      <div class="flex space-x-2">
-        <input type="text" id="recipeName" placeholder="Nom de la recette" class="p-2 border border-gray-300 rounded">
-        <input type="text" id="ingredients" placeholder="Ingrédients" class="p-2 border border-gray-300 rounded">
-        <button onclick="addRecipe()" class="p-2 bg-blue-500 text-white rounded">Ajouter</button>
-      </div>
-    </div>
-
-    <!-- Section pour visualiser et supprimer une recette -->
-    <div class="mb-8">
-      <h2 class="text-2xl font-semibold mb-4">Liste des recettes</h2>
-      <ul id="recipeList" class="list-disc pl-4"></ul>
-    </div>
-
-    <!-- Section pour lancer une commande en cuisine -->
-    <div class="mb-8">
-      <h2 class="text-2xl font-semibold mb-4">Lancer une commande en cuisine</h2>
-      <div class="flex space-x-2">
-        <select id="selectRecipe" class="p-2 border border-gray-300 rounded">
-          <!-- Ajoutez des options ici -->
-        </select>
-        <input type="text" id="sauce" placeholder="Sauce" class="p-2 border border-gray-300 rounded">
-        <button onclick="sendToKitchen()" class="p-2 bg-green-500 text-white rounded">Envoyer en cuisine</button>
-      </div>
-    </div>
-
-    <!-- Section pour visualiser et valider une commande -->
-    <div>
-      <h2 class="text-2xl font-semibold mb-4">Liste des commandes en cuisine</h2>
-      <ul id="orderList" class="list-disc pl-4"></ul>
-    </div>
-
-  </div>
-
-  <script src="app.js"></script>
-</body>
+            <div>
+                <h2>Liste des commandes</h2>
+                <!-- Liste des commandes en cuisine -->
+                <ul id="orderList" class="mb-6"></ul>
+                <h2>Commandes validés</h2>
+                <!-- Liste des commandes validées -->
+                <ul id="validatedOrders"></ul>
+            </div>
+            
+        
+        </div>
+        <script src="app.js"></script>
+    </body>
 </html>

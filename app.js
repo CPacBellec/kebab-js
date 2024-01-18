@@ -1,157 +1,235 @@
-// Tableau pour stocker les recettes
-let recipes = [];
+function startTimer() {
+    // Récupérer la date et l'heure actuelle
+    fetch('https://worldtimeapi.org/api/timezone/Europe/Paris')
+        .then(response => response.json())
+        .then(data => {
+            const date = new Date(data.datetime);
+            const dateString = date.toLocaleDateString();
+            const timeString = date.toLocaleTimeString();
 
-// Tableau pour stocker les commandes en cuisine
-let orders = [];
+            // Afficher la date et l'heure
+            document.getElementById('clock').innerHTML = `Date : ${dateString}, Heure : ${timeString}`;
 
-// Fonction pour sauvegarder les recettes dans le stockage local
-function saveRecipes() {
-    localStorage.setItem('recipes', JSON.stringify(recipes));
-  }
-
-// Fonction pour ajouter une recette
-function addRecipe() {
-  const recipeName = document.getElementById('recipeName').value;
-  const ingredients = document.getElementById('ingredients').value;
-
-  if (recipeName && ingredients) {
-    const recipe = { name: recipeName, ingredients: ingredients };
-    recipes.push(recipe);
-
-    saveRecipes();
-
-    // Met à jour la liste des recettes
-    updateRecipeList();
-
-    // Efface les champs de saisie
-    document.getElementById('recipeName').value = '';
-    document.getElementById('ingredients').value = '';
-  } else {
-    alert('Veuillez saisir le nom de la recette et les ingrédients.');
-  }
+            // Lancer le timer
+            let minutes = 0;
+            let seconds = 0;
+            timer = setInterval(function () {
+                seconds++;
+                if (seconds === 60) {
+                    minutes++;
+                    seconds = 0;
+                }
+                document.getElementById('timer').innerHTML = `Temps écoulé : ${minutes} minutes et ${seconds} secondes`;
+            }, 1000);
+        })
+        .catch(error => console.error('Erreur lors de la récupération de l\'heure:', error));
 }
 
-// Fonction pour mettre à jour la liste des recettes
-// Fonction pour mettre à jour la liste des recettes
-function updateRecipeList() {
+function stopTimer() {
+    // Arrêter le timer
+    clearInterval(timer);
+
+    // Afficher un message
+    document.getElementById('message').innerHTML = 'Timer arrêté.';
+
+    // Supprimer la date, l'heure et le message après quelques secondes
+    setTimeout(function () {
+        document.getElementById('clock').innerHTML = '';
+        document.getElementById('timer').innerHTML = '';
+        document.getElementById('message').innerHTML = '';
+    }, 3000); // 3000 millisecondes (3 secondes)
+}
+
+// Charge les recettes depuis le stockage local lors du chargement de la page
+document.addEventListener('DOMContentLoaded', function () {
+    const savedRecipes = JSON.parse(localStorage.getItem('recipes')) || [];
+    renderRecipes(savedRecipes);
+
+    // Peuple la liste des recettes
+    populateRecipeSelect(savedRecipes);
+});
+
+// Fonctions pour ajouter, visualiser et supprimer une recette
+function addRecipe() {
+    const recipeName = document.getElementById('recipeName').value;
+    const ingredients = document.getElementById('ingredients').value;
+
+    // Récupère les recettes existantes du stockage local
+    const savedRecipes = JSON.parse(localStorage.getItem('recipes')) || [];
+
+    // Ajoute la nouvelle recette à la liste
+    savedRecipes.push({ name: recipeName, ingredients: ingredients });
+
+    // Sauvegarde les recettes mises à jour dans le stockage local
+    localStorage.setItem('recipes', JSON.stringify(savedRecipes));
+
+    // Affiche les recettes à l'écran
+    renderRecipes(savedRecipes);
+}
+
+function removeRecipe(button) {
+    const listItem = button.parentNode;
+    const recipeIndex = Array.from(listItem.parentNode.children).indexOf(listItem);
+
+    const savedRecipes = JSON.parse(localStorage.getItem('recipes')) || [];
+    savedRecipes.splice(recipeIndex, 1);
+
+    localStorage.setItem('recipes', JSON.stringify(savedRecipes));
+
+    listItem.parentNode.removeChild(listItem);
+}
+
+// Fonction pour afficher les recettes à l'écran
+function renderRecipes(recipes) {
     const recipeList = document.getElementById('recipeList');
     recipeList.innerHTML = '';
-  
-    recipes.forEach(recipe => {
-      const li = document.createElement('li');
-      li.innerHTML = `${recipe.name} - ${recipe.ingredients}
-        <button onclick="deleteRecipe('${recipe.name}')">Supprimer</button>`;
-      recipeList.appendChild(li);
+
+    recipes.forEach((recipe) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `${recipe.name} - ${recipe.ingredients} <button class="bg-red-500 text-white px-4 py-2 rounded" onclick="removeRecipe(this)">Supprimer</button>`;
+        recipeList.appendChild(listItem);
     });
-  
-    // Met à jour la liste des recettes dans le formulaire de commande
-    updateRecipeDropdown();
-  }
-  
-
-// Fonction pour mettre à jour la liste des recettes dans le formulaire de commande
-function updateRecipeDropdown() {
-  const selectRecipe = document.getElementById('selectRecipe');
-  selectRecipe.innerHTML = '';
-
-  recipes.forEach(recipe => {
-    const option = document.createElement('option');
-    option.value = recipe.name;
-    option.textContent = recipe.name;
-    selectRecipe.appendChild(option);
-  });
 }
 
-function deleteRecipe(recipeName) {
-    recipes = recipes.filter(recipe => recipe.name !== recipeName);
+function populateRecipeSelect(recipes) {
+    const recipeSelect = document.getElementById('recipeSelect');
 
-    saveRecipes();
-  
-    // Met à jour la liste des recettes
-    updateRecipeList();
-  
-    // Met à jour la liste des commandes en cuisine pour retirer la recette supprimée
-    updateOrderList();
-  }
-
-// Fonction pour envoyer une commande en cuisine
+    recipes.forEach((recipe) => {
+        const option = document.createElement('option');
+        option.value = recipe.name;
+        option.text = recipe.name;
+        recipeSelect.add(option);
+    });
+}
+// Fonctions pour lancer une commande en cuisine
 function sendToKitchen() {
-    const selectedRecipeName = document.getElementById('selectRecipe').value;
+    // Récupérer les valeurs des champs
+    const recipeSelect = document.getElementById('recipeSelect');
+    const selectedRecipe = recipeSelect.options[recipeSelect.selectedIndex].text;
     const sauce = document.getElementById('sauce').value;
-  
-    if (selectedRecipeName && sauce) {
-      const selectedRecipe = recipes.find(recipe => recipe.name === selectedRecipeName);
-  
-      if (selectedRecipe) {
-        const order = {
-          recipe: selectedRecipe,
-          sauce: sauce,
-          timestamp: new Date()
-        };
-  
-        orders.push(order);
-  
-        // Met à jour la liste des commandes en cuisine
-        updateOrderList();
-  
-        // Efface les champs de saisie
-        document.getElementById('selectRecipe').value = '';
-        document.getElementById('sauce').value = '';
-      }
-    } else {
-      alert('Veuillez choisir une recette et indiquer la sauce.');
-    }
-  }
-  
-  // Fonction pour mettre à jour la liste des commandes en cuisine
-  async function updateOrderList() {
+
+    // Récupérer la date et l'heure actuelle
+    fetch('https://worldtimeapi.org/api/timezone/Europe/Paris')
+        .then(response => response.json())
+        .then(data => {
+            const date = new Date(data.datetime);
+
+            // Créer un élément de liste pour afficher la commande en cuisine
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `${selectedRecipe} - Sauce : ${sauce} - Commande lancée à ${date.toLocaleTimeString()} <span id="timer_${Date.now()}"></span> <button onclick="validateOrder(this)">Valider</button>`;
+
+            // Ajouter la commande à la liste des commandes en cuisine
+            document.getElementById('orderList').appendChild(listItem);
+
+            // Lancer le timer pour cette commande spécifique
+            startTimerForOrder(date, listItem);
+        })
+        .catch(error => console.error('Erreur lors de la récupération de l\'heure:', error));
+}
+
+// Fonction pour démarrer le timer pour une commande spécifique
+function startTimerForOrder(startDate, listItem) {
+    let timer;
+    // Met à jour le timer toutes les secondes
+    timer = setInterval(function () {
+        const now = new Date();
+        const elapsedSeconds = Math.floor((now - startDate) / 1000);
+        const minutes = Math.floor(elapsedSeconds / 60);
+        const seconds = elapsedSeconds % 60;
+
+        // Met à jour l'affichage du timer
+        const timerElement = listItem.querySelector('span');
+        timerElement.innerHTML = ` - Temps écoulé : ${minutes} minutes et ${seconds} secondes`;
+
+    }, 1000);
+
+    // Ajoute l'identifiant du timer à l'élément de la liste pour pouvoir l'arrêter plus tard
+    listItem.dataset.timerId = timer;
+}
+
+// Fonction pour valider une commande
+// Fonction pour valider une commande
+function validateOrder(button) {
+    // Supprimer la commande de la liste des commandes en cuisine
+    const listItem = button.parentNode;
+    clearInterval(listItem.dataset.timerId); // Arrêter le timer associé à cette commande
+
+    // Récupérer les commandes en cours depuis le stockage local
+    const savedOrders = JSON.parse(localStorage.getItem('orders')) || { inProgress: [], validated: [] };
+
+    // Déplacer la commande vers la liste des commandes validées
+    savedOrders.validated.push({ name: listItem.textContent, time: new Date() });
+
+    // Sauvegarder les commandes mises à jour dans le stockage local
+    localStorage.setItem('orders', JSON.stringify(savedOrders));
+
+    // Charger les commandes depuis le stockage local
+    loadOrders();
+
+    // Ajouter un bouton pour supprimer la commande validée
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = 'Supprimer';
+    deleteButton.onclick = function () {
+        deleteValidatedOrder(this);
+    };
+    listItem.appendChild(deleteButton);
+}
+
+// Fonction pour sauvegarder les commandes
+function saveOrders(orders) {
+    localStorage.setItem('orders', JSON.stringify(orders));
+}
+
+// Fonction pour charger les commandes
+function loadOrders() {
+    const savedOrders = JSON.parse(localStorage.getItem('orders')) || { inProgress: [], validated: [] };
+    
     const orderList = document.getElementById('orderList');
+    const validatedOrdersList = document.getElementById('validatedOrders');
+
     orderList.innerHTML = '';
-  
-    for (const order of orders) {
-      const li = document.createElement('li');
-      const elapsedTime = await getElapsedTime(order.timestamp);
-      li.textContent = `${order.recipe.name} - Sauce: ${order.sauce} - Temps écoulé: ${elapsedTime}`;
-      orderList.appendChild(li);
-    }
-  }
-  
-  // Appel initial de la fonction pour mettre à jour la liste des recettes
-  updateRecipeList();
+    validatedOrdersList.innerHTML = '';
 
-// Fonction pour obtenir le temps écoulé depuis la prise de commande
-async function getElapsedTime(timestamp) {
-    try {
-      // Récupère l'heure actuelle à Paris depuis l'API WorldTime
-      const response = await fetch('https://worldtimeapi.org/api/timezone/Europe/Paris');
-      const data = await response.json();
-      
-      // Utilise le timestamp de l'API WorldTime pour calculer le temps écoulé
-      const apiTimestamp = new Date(data.utc_datetime);
-      const elapsedMilliseconds = apiTimestamp - timestamp;
-      const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
-      const minutes = Math.floor(elapsedSeconds / 60);
-      const seconds = elapsedSeconds % 60;
-  
-      return `${minutes.toString().padStart(2, '0')}m${seconds.toString().padStart(2, '0')}s`;
-    } catch (error) {
-      console.error('Erreur lors de la récupération de l\'heure depuis l\'API:', error);
-      return 'Erreur';
-    }
-  }
+    savedOrders.inProgress.forEach((order) => {
+        const listItem = createOrderListItem(order);
+        orderList.appendChild(listItem);
+        startTimerForOrder(order.time, listItem);
+    });
 
-// Met à jour la liste des recettes lors du chargement initial
-updateRecipeList();
+    savedOrders.validated.forEach((order) => {
+        const listItem = createOrderListItem(order);
+        const deleteButton = createDeleteButton(() => deleteValidatedOrder(listItem));
+        listItem.appendChild(deleteButton);
+        validatedOrdersList.appendChild(listItem);
+    });
+}
 
-function loadRecipes() {
-    const savedRecipes = localStorage.getItem('recipes');
-  
-    if (savedRecipes) {
-      recipes = JSON.parse(savedRecipes);
-      // Met à jour la liste des recettes
-      updateRecipeList();
-    }
-  }
-  
-  // Appel initial de la fonction pour charger les recettes
-  loadRecipes();
+// Fonction pour créer un élément de liste pour une commande
+function createOrderListItem(order) {
+    const listItem = document.createElement('li');
+    listItem.innerHTML = `${order.name} - ${order.sauce} - Commande lancée à ${order.time.toLocaleTimeString()} <span id="timer_${order.time.getTime()}"></span>`;
+    return listItem;
+}
+
+// Fonction pour créer un bouton de suppression
+function createDeleteButton(callback) {
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = 'Supprimer';
+    deleteButton.onclick = callback;
+    return deleteButton;
+}
+
+// Fonction pour supprimer une commande validée
+function deleteValidatedOrder(listItem) {
+    const savedOrders = JSON.parse(localStorage.getItem('orders')) || { inProgress: [], validated: [] };
+
+    // Retirer la commande de la liste des commandes validées
+    const orderIndex = savedOrders.validated.findIndex((order) => order.time.getTime() === listItem.time.getTime());
+    savedOrders.validated.splice(orderIndex, 1);
+
+    saveOrders(savedOrders);
+
+    // Charger les commandes depuis le stockage local
+    loadOrders();
+}
+

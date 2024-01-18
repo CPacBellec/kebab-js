@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horloge et Timer</title>
+</head>
+<body>
+
+<button id="startButton" onclick="startTimer()">Démarrer</button>
+<button id="stopButton" onclick="stopTimer()">Arrêter</button>
+
+<div id="clock"></div>
+<div id="timer"></div>
+<div id="message"></div>
+
+<script>
+    let timer;
+
+    function startTimer() {
+        // Récupérer la date et l'heure actuelle
+        fetch('https://worldtimeapi.org/api/timezone/Europe/Paris')
+            .then(response => response.json())
+            .then(data => {
+                const date = new Date(data.datetime);
+                const dateString = date.toLocaleDateString();
+                const timeString = date.toLocaleTimeString();
+
+                // Afficher la date et l'heure
+                document.getElementById('clock').innerHTML = `Date : ${dateString}, Heure : ${timeString}`;
+
+                // Lancer le timer
+                let minutes = 0;
+                let seconds = 0;
+                timer = setInterval(function () {
+                    seconds++;
+                    if (seconds === 60) {
+                        minutes++;
+                        seconds = 0;
+                    }
+                    document.getElementById('timer').innerHTML = `Temps écoulé : ${minutes} minutes et ${seconds} secondes`;
+                }, 1000);
+            })
+            .catch(error => console.error('Erreur lors de la récupération de l\'heure:', error));
+    }
+
+    function stopTimer() {
+        // Arrêter le timer
+        clearInterval(timer);
+
+        // Afficher un message
+        document.getElementById('message').innerHTML = 'Timer arrêté.';
+
+        // Supprimer la date, l'heure et le message après quelques secondes
+        setTimeout(function () {
+            document.getElementById('clock').innerHTML = '';
+            document.getElementById('timer').innerHTML = '';
+            document.getElementById('message').innerHTML = '';
+        }, 3000); // 3000 millisecondes (3 secondes)
+    }
+</script>
+
+</body>
+</html>
